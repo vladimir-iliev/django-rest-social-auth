@@ -122,18 +122,7 @@ class BaseSocialAuthView(GenericAPIView):
 
     def get_object(self):
         user = self.request.user
-        manual_redirect_uri = self.request.auth_data.pop('redirect_uri', None)
-        manual_redirect_uri = self.get_redirect_uri(manual_redirect_uri)
-        if manual_redirect_uri:
-            self.request.backend.redirect_uri = manual_redirect_uri
-        elif DOMAIN_FROM_ORIGIN:
-            origin = self.request.strategy.request.META.get('HTTP_ORIGIN')
-            if origin:
-                relative_path = urlparse(self.request.backend.redirect_uri).path
-                url = urlparse(origin)
-                origin_scheme_host = "%s://%s" % (url.scheme, url.netloc)
-                location = urljoin(origin_scheme_host, relative_path)
-                self.request.backend.redirect_uri = iri_to_uri(location)
+        self.request.backend.redirect_uri = None
         is_authenticated = user_is_authenticated(user)
         user = is_authenticated and user or None
         # skip checking state by setting following params to False
